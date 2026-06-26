@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Glow Admin · Olohi</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:#09090F;color:#E8E0F0;font-family:'Inter',sans-serif;min-height:100vh;display:flex}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:#09090F}::-webkit-scrollbar-thumb{background:#2a2a3a;border-radius:3px}
+
+/* SIDEBAR */
+.sidebar{width:220px;min-height:100vh;background:#0d0d16;border-right:1px solid #1a1a2a;display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:20}
+.sidebar-logo{padding:24px 20px 20px;border-bottom:1px solid #1a1a2a}
+.logo-text{font-family:'DM Serif Display',serif;font-size:20px;color:#E8E0F0}
+.logo-text span{color:#CE93D8}
+.logo-sub{font-size:10px;color:#555;letter-spacing:2px;margin-top:2px;text-transform:uppercase}
+.sidebar-nav{padding:16px 12px;flex:1;display:flex;flex-direction:column;gap:4px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;font-size:13px;color:#666;transition:all .2s;border:none;background:none;font-family:inherit;width:100%;text-align:left}
+.nav-item:hover{color:#E8E0F0;background:#111118}
+.nav-item.active{color:#CE93D8;background:#1e1a2e}
+.nav-icon{font-size:16px;width:20px;text-align:center}
+.nav-badge{margin-left:auto;background:#EF5350;color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px}
+.sidebar-bottom{padding:16px 12px;border-top:1px solid #1a1a2a}
+.admin-chip{display:flex;align-items:center;gap:10px;padding:10px 12px;background:#111118;border-radius:10px}
+.admin-avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#8B5CF6,#CE93D8);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0}
+.admin-name{font-size:12px;font-weight:600;color:#E8E0F0}
+.admin-role{font-size:10px;color:#555}
+
+/* MAIN */
+.main{margin-left:220px;flex:1;min-height:100vh;display:flex;flex-direction:column}
+.topbar{padding:18px 28px;border-bottom:1px solid #1a1a2a;display:flex;justify-content:space-between;align-items:center;background:rgba(9,9,15,0.95);position:sticky;top:0;z-index:10;backdrop-filter:blur(10px)}
+.page-title{font-family:'DM Serif Display',serif;font-size:22px}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.topbar-date{font-size:12px;color:#555}
+.notif-btn{background:#111118;border:1px solid #1e1e2e;border-radius:10px;padding:8px 12px;color:#aaa;font-size:13px;cursor:pointer;position:relative}
+.notif-dot{position:absolute;top:6px;right:8px;width:7px;height:7px;border-radius:50%;background:#EF5350;border:2px solid #09090F}
+
+.content{padding:28px;flex:1}
+
+/* VIEWS */
+.view{display:none}.view.active{display:block}
+
+/* STAT CARDS */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px}
+.stat-card{background:#111118;border:1px solid #1e1e2e;border-radius:14px;padding:20px 18px}
+.stat-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+.stat-icon{font-size:20px}
+.stat-trend{font-size:11px;color:#66BB6A;font-weight:600}
+.stat-trend.down{color:#EF5350}
+.stat-val{font-size:26px;font-weight:800;margin-bottom:3px}
+.stat-label{font-size:11px;color:#555;text-transform:uppercase;letter-spacing:0.8px}
+
+/* CHARTS ROW */
+.charts-row{display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:28px}
+.chart-card{background:#111118;border:1px solid #1e1e2e;border-radius:14px;padding:20px}
+.chart-title{font-size:13px;font-weight:700;margin-bottom:4px}
+.chart-sub{font-size:11px;color:#555;margin-bottom:20px}
+.bar-chart{display:flex;align-items:flex-end;gap:8px;height:100px}
+.bar-col{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1}
+.bar{border-radius:4px 4px 0 0;width:100%;background:linear-gradient(180deg,#8B5CF6,#CE93D8);transition:height .4s}
+.bar-lbl{font-size:10px;color:#555}
+.donut-wrap{display:flex;flex-direction:column;gap:10px;justify-content:center;height:100%}
+.donut-item{display:flex;align-items:center;gap:10px}
+.donut-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.donut-name{font-size:12px;color:#aaa;flex:1}
+.donut-pct{font-size:12px;font-weight:700}
+
+/* ORDERS TABLE */
+.section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.section-title-sm{font-size:15px;font-weight:700}
+.filter-row{display:flex;gap:8px}
+.filter-btn{background:#111118;border:1px solid #1e1e2e;border-radius:20px;padding:6px 14px;font-size:12px;color:#666;cursor:pointer;font-family:inherit;transition:all .2s}
+.filter-btn.active{background:#1e1a2e;border-color:#8B5CF6;color:#CE93D8}
+.table-wrap{background:#111118;border:1px solid #1e1e2e;border-radius:14px;overflow:hidden;margin-bottom:28px}
+table{width:100%;border-collapse:collapse}
+th{padding:12px 16px;text-align:left;font-size:11px;color:#555;text-transform:uppercase;letter-spacing:0.8px;border-bottom:1px solid #1a1a2a;font-weight:600}
+td{padding:14px 16px;font-size:13px;border-bottom:1px solid #0f0f1a;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#0d0d18}
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
+.badge-pending{color:#F5A623;background:rgba(245,166,35,0.12)}
+.badge-progress{color:#4FC3F7;background:rgba(79,195,247,0.12)}
+.badge-done{color:#66BB6A;background:rgba(102,187,106,0.12)}
+.badge-declined{color:#EF5350;background:rgba(239,83,80,0.12)}
+.badge-dispute{color:#FF7043;background:rgba(255,112,67,0.12)}
+.action-btn{background:none;border:1px solid #2a2a3a;border-radius:8px;padding:5px 12px;font-size:12px;color:#aaa;cursor:pointer;font-family:inherit;transition:all .2s}
+.action-btn:hover{border-color:#8B5CF6;color:#CE93D8}
+.action-btn.resolve{border-color:#66BB6A;color:#66BB6A}
+.action-btn.resolve:hover{background:#0d1a0e}
+
+/* VENDORS VIEW */
+.vendors-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.vendor-card{background:#111118;border:1px solid #1e1e2e;border-radius:14px;overflow:hidden}
+.vendor-card-img{width:100%;height:100px;object-fit:cover;display:block}
+.vendor-card-body{padding:16px}
+.vendor-card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
+.vendor-card-name{font-weight:700;font-size:15px}
+.vendor-card-type{font-size:11px;color:#CE93D8;margin-bottom:8px}
+.vendor-card-meta{font-size:12px;color:#666;line-height:1.8}
+.vendor-card-stats{display:flex;gap:14px;margin-top:12px;padding-top:12px;border-top:1px solid #1a1a2a}
+.vstat{text-align:center;flex:1}
+.vstat-val{font-size:16px;font-weight:700;color:#CE93D8}
+.vstat-lbl{font-size:10px;color:#555;margin-top:2px}
+.vendor-actions{display:flex;gap:8px;margin-top:14px}
+.vbtn{flex:1;padding:8px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;border:1px solid #2a2a3a;background:none;color:#aaa;transition:all .2s}
+.vbtn:hover{border-color:#8B5CF6;color:#CE93D8}
+.vbtn.suspend{border-color:#EF5350;color:#EF5350}
+.vbtn.suspend:hover{background:#1a0d0d}
+
+/* DISPUTES VIEW */
+.dispute-list{display:flex;flex-direction:column;gap:12px}
+.dispute-card{background:#111118;border:1px solid #1e1e2e;border-radius:14px;padding:20px}
+.dispute-card.urgent{border-color:#EF5350}
+.dispute-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.dispute-id{font-family:monospace;font-size:12px;color:#555}
+.dispute-service{font-weight:700;font-size:15px;margin-bottom:4px}
+.dispute-meta{font-size:12px;color:#666;margin-bottom:12px}
+.dispute-reason{background:#0d0d18;border-left:3px solid #EF5350;padding:10px 14px;border-radius:0 8px 8px 0;font-size:13px;color:#aaa;margin-bottom:14px}
+.dispute-btns{display:flex;gap:10px}
+.dbtn{flex:1;padding:10px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;border:none}
+.dbtn-refund{background:#1a0d0d;border:1px solid #EF5350;color:#EF5350}
+.dbtn-release{background:#0d1a0e;border:1px solid #66BB6A;color:#66BB6A}
+.dbtn-msg{background:#111118;border:1px solid #2a2a3a;color:#aaa}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:100;display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:#141420;border:1px solid #2a2a3a;border-radius:18px;padding:28px;max-width:480px;width:100%;max-height:80vh;overflow-y:auto}
+.modal-title{font-family:'DM Serif Display',serif;font-size:22px;margin-bottom:4px}
+.modal-sub{font-size:13px;color:#777;margin-bottom:24px}
+.modal-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #1a1a2a;font-size:14px}
+.modal-row:last-of-type{border-bottom:none}
+.modal-lbl{color:#777}
+.modal-val{font-weight:600;text-align:right}
+.modal-close{width:100%;margin-top:20px;padding:12px;background:#1e1a2e;border:1px solid #8B5CF6;border-radius:10px;color:#CE93D8;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
+
+/* TOAST */
+.toast{position:fixed;bottom:28px;right:28px;background:#1e1a2e;border:1px solid #8B5CF6;border-radius:12px;padding:14px 20px;font-size:14px;color:#CE93D8;font-weight:600;z-index:200;transform:translateY(20px);opacity:0;transition:all .3s}
+.toast.show{transform:translateY(0);opacity:1}
+
+/* EMPTY */
+.empty-state{text-align:center;padding:60px 0;color:#444;font-size:14px}
+.empty-icon{font-size:40px;margin-bottom:12px}
+
+@media(max-width:768px){
+  .sidebar{display:none}
+  .main{margin-left:0}
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .charts-row{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-text">Glow <span>✦</span></div>
+    <div class="logo-sub">Admin Portal</div>
+  </div>
+  <nav class="sidebar-nav">
+    <button class="nav-item active" onclick="switchView('overview',this)"><span class="nav-icon">📊</span> Overview</button>
+    <button class="nav-item" onclick="switchView('orders',this)"><span class="nav-icon">📋</span> All Orders <span class="nav-badge" id="pending-badge">3</span></button>
+    <button class="nav-item" onclick="switchView('vendors',this)"><span class="nav-icon">🏪</span> Vendors</button>
+    <button class="nav-item" onclick="switchView('disputes',this)"><span class="nav-icon">⚠️</span> Disputes <span class="nav-badge" id="dispute-badge">2</span></button>
+    <button class="nav-item" onclick="switchView('customers',this)"><span class="nav-icon">👥</span> Customers</button>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="admin-chip">
+      <div class="admin-avatar">O</div>
+      <div><div class="admin-name">Olohi</div><div class="admin-role">Super Admin</div></div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="topbar">
+    <div class="page-title" id="page-title">Overview</div>
+    <div class="topbar-right">
+      <span class="topbar-date" id="topbar-date"></span>
+      <button class="notif-btn">🔔 <span class="notif-dot"></span></button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ── OVERVIEW ── -->
+    <div class="view active" id="view-overview">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-top"><span class="stat-icon">💰</span><span class="stat-trend">↑ 18%</span></div>
+          <div class="stat-val">₦284,500</div>
+          <div class="stat-label">Total Escrow Volume</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top"><span class="stat-icon">📋</span><span class="stat-trend">↑ 12%</span></div>
+          <div class="stat-val">47</div>
+          <div class="stat-label">Orders This Week</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top"><span class="stat-icon">🏪</span><span class="stat-trend">↑ 2</span></div>
+          <div class="stat-val">12</div>
+          <div class="stat-label">Active Vendors</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top"><span class="stat-icon">⚠️</span><span class="stat-trend down">2 open</span></div>
+          <div class="stat-val">2</div>
+          <div class="stat-label">Open Disputes</div>
+        </div>
+      </div>
+
+      <div class="charts-row">
+        <div class="chart-card">
+          <div class="chart-title">Bookings this week</div>
+          <div class="chart-sub">Orders by day</div>
+          <div class="bar-chart" id="bar-chart"></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Service breakdown</div>
+          <div class="chart-sub">By category</div>
+          <div class="donut-wrap">
+            <div class="donut-item"><div class="donut-dot" style="background:#CE93D8"></div><span class="donut-name">Hair Styling</span><span class="donut-pct" style="color:#CE93D8">38%</span></div>
+            <div class="donut-item"><div class="donut-dot" style="background:#8B5CF6"></div><span class="donut-name">Extensions</span><span class="donut-pct" style="color:#8B5CF6">27%</span></div>
+            <div class="donut-item"><div class="donut-dot" style="background:#4FC3F7"></div><span class="donut-name">Barbing</span><span class="donut-pct" style="color:#4FC3F7">22%</span></div>
+            <div class="donut-item"><div class="donut-dot" style="background:#66BB6A"></div><span class="donut-name">Laundry</span><span class="donut-pct" style="color:#66BB6A">13%</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent orders mini -->
+      <div class="section-header">
+        <div class="section-title-sm">Recent orders</div>
+        <button class="filter-btn active" onclick="switchView('orders',document.querySelectorAll('.nav-item')[1])">See all →</button>
+      </div>
+      <div class="table-wrap" id="recent-orders-table"></div>
+    </div>
+
+    <!-- ── ALL ORDERS ── -->
+    <div class="view" id="view-orders">
+      <div class="section-header">
+        <div class="section-title-sm">All orders</div>
+        <div class="filter-row">
+          <button class="filter-btn active" onclick="filterOrders('all',this)">All</button>
+          <button class="filter-btn" onclick="filterOrders('pending',this)">Pending</button>
+          <button class="filter-btn" onclick="filterOrders('in-progress',this)">In Progress</button>
+          <button class="filter-btn" onclick="filterOrders('done',this)">Done</button>
+          <button class="filter-btn" onclick="filterOrders('dispute',this)">Disputes</button>
+        </div>
+      </div>
+      <div class="table-wrap" id="all-orders-table"></div>
+    </div>
+
+    <!-- ── VENDORS ── -->
+    <div class="view" id="view-vendors">
+      <div class="section-header">
+        <div class="section-title-sm">Registered vendors</div>
+        <button class="filter-btn active">12 active</button>
+      </div>
+      <div class="vendors-grid" id="vendors-grid"></div>
+    </div>
+
+    <!-- ── DISPUTES ── -->
+    <div class="view" id="view-disputes">
+      <div class="section-header">
+        <div class="section-title-sm">Open disputes</div>
+        <div style="font-size:12px;color:#777">Funds are held until you resolve each dispute</div>
+      </div>
+      <div class="dispute-list" id="dispute-list"></div>
+    </div>
+
+    <!-- ── CUSTOMERS ── -->
+    <div class="view" id="view-customers">
+      <div class="section-header">
+        <div class="section-title-sm">Customers</div>
+      </div>
+      <div class="table-wrap" id="customers-table"></div>
+    </div>
+
+  </div>
+</main>
+
+<!-- ORDER MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <div class="modal-title" id="modal-title"></div>
+    <div class="modal-sub" id="modal-sub"></div>
+    <div id="modal-body"></div>
+    <button class="modal-close" onclick="closeModal()">Close</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── DATA ──
+const ORDERS = [
+  {id:'ORD-7821',customer:'Amara O.',email:'amara@email.com',phone:'080-1234-5678',service:'Lush Extensions (Medium)',vendor:'Premium Imports',vendorId:'GLOW-001',amount:9000,bond:1500,date:'2026-06-26 10:14',status:'pending',location:'UniUyo Permanent Campus',note:'Color 33 – Rich Burgundy',token:'GLW-A3X2'},
+  {id:'ORD-7835',customer:'Chisom E.',email:'chisom@email.com',phone:'081-9876-5432',service:'Knotless Braids (Large)',vendor:'Adaeze Styles',vendorId:'GLOW-002',amount:25000,bond:1500,date:'2026-06-26 11:00',status:'pending',location:'UniUyo Permanent Campus',note:'Client bringing own extensions',token:'GLW-B7K9'},
+  {id:'ORD-7840',customer:'Emeka J.',email:'emeka@email.com',phone:'090-5555-1234',service:'Mid-Fade + Custom Dye',vendor:'King Cuts',vendorId:'GLOW-003',amount:8500,bond:1500,date:'2026-06-26 09:00',status:'in-progress',location:'UniUyo Permanent Campus',note:'2 slots booked',token:'GLW-C2M1'},
+  {id:'ORD-7798',customer:'Tolu B.',email:'tolu@email.com',phone:'080-3333-7890',service:'X-Pression Ultra Braid Pack',vendor:'Premium Imports',vendorId:'GLOW-001',amount:12500,bond:1500,date:'2026-06-25 16:40',status:'in-progress',location:'UniUyo Permanent Campus',note:'Color 1 – Jet Black',token:'GLW-D5P3'},
+  {id:'ORD-7751',customer:'Faith N.',email:'faith@email.com',phone:'081-7777-2345',service:'Lush Extensions (Small)',vendor:'Premium Imports',vendorId:'GLOW-001',amount:5500,bond:1500,date:'2026-06-24 09:22',status:'done',location:'UniUyo Town Campus',note:'',token:'GLW-E8Q7'},
+  {id:'ORD-7819',customer:'David A.',email:'david@email.com',phone:'090-2222-6789',service:'Clean Fade',vendor:'King Cuts',vendorId:'GLOW-003',amount:4500,bond:1500,date:'2026-06-25 14:00',status:'done',location:'Abuja Federal Capital',note:'',token:'GLW-F1R4'},
+  {id:'ORD-7812',customer:'Sandra K.',email:'sandra@email.com',phone:'080-8888-3456',service:'Frontal Installation',vendor:'Adaeze Styles',vendorId:'GLOW-002',amount:35000,bond:1500,date:'2026-06-25 13:30',status:'dispute',location:'Ikeja, Lagos',note:'Vendor was 45 min late',token:'GLW-G6S8',disputeReason:'Vendor arrived 45 minutes late and the style does not match what was agreed. Requesting partial refund.'},
+  {id:'ORD-7845',customer:'Ngozi P.',email:'ngozi@email.com',phone:'081-4444-9012',service:'Delicate Architectural Care',vendor:'FreshPress Laundry',vendorId:'GLOW-004',amount:6000,bond:1500,date:'2026-06-26 12:30',status:'dispute',location:'UniUyo Town Campus',note:'Express delivery requested',token:'GLW-H9T2',disputeReason:'Items were returned with stains that were not there before. Requesting full refund.'},
+];
+
+const VENDORS = [
+  {id:'GLOW-001',name:'Premium Imports',type:'Extension Store',emoji:'💎',location:'UniUyo Permanent Campus',rating:4.8,orders:18,earned:142000,joined:'Mar 2026',img:'https://images.unsplash.com/photo-1492106087820-71f1a00d2b11?auto=format&fit=crop&w=500&q=80',status:'active'},
+  {id:'GLOW-002',name:'Adaeze Styles',type:'Hair Stylist',emoji:'✂️',location:'UniUyo Permanent Campus',rating:4.9,orders:24,earned:310000,joined:'Feb 2026',img:'https://images.unsplash.com/photo-1595476108010-b4d1f102b1b1?auto=format&fit=crop&w=500&q=80',status:'active'},
+  {id:'GLOW-003',name:'King Cuts',type:'Barber',emoji:'💈',location:'UniUyo Permanent Campus',rating:4.8,orders:31,earned:198000,joined:'Jan 2026',img:'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=500&q=80',status:'active'},
+  {id:'GLOW-004',name:'FreshPress Laundry',type:'Laundry Station',emoji:'👕',location:'UniUyo Town Campus',rating:4.5,orders:12,earned:67000,joined:'Apr 2026',img:'https://images.unsplash.com/photo-1517677208171-0bc6725a3e60?auto=format&fit=crop&w=500&q=80',status:'active'},
+  {id:'GLOW-005',name:'Luxe Hair Hub',type:'Extension Store',emoji:'💎',location:'Ikeja, Lagos',rating:4.6,orders:9,earned:88000,joined:'May 2026',img:'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=500&q=80',status:'active'},
+  {id:'GLOW-006',name:'Hair by Blessing',type:'Hair Stylist',emoji:'✂️',location:'Abuja Federal Capital',rating:4.7,orders:15,earned:220000,joined:'Mar 2026',img:'https://images.unsplash.com/photo-1560066984-138daaa0-20c9?auto=format&fit=crop&w=500&q=80',status:'suspended'},
+];
+
+const CUSTOMERS = [
+  {name:'Amara O.',email:'amara@email.com',phone:'080-1234-5678',orders:3,spent:22500,joined:'Jun 2026',lastOrder:'2026-06-26'},
+  {name:'Chisom E.',email:'chisom@email.com',phone:'081-9876-5432',orders:1,spent:25000,joined:'Jun 2026',lastOrder:'2026-06-26'},
+  {name:'Emeka J.',email:'emeka@email.com',phone:'090-5555-1234',orders:2,spent:17000,joined:'May 2026',lastOrder:'2026-06-26'},
+  {name:'Tolu B.',email:'tolu@email.com',phone:'080-3333-7890',orders:4,spent:48000,joined:'Apr 2026',lastOrder:'2026-06-25'},
+  {name:'Faith N.',email:'faith@email.com',phone:'081-7777-2345',orders:2,spent:11000,joined:'May 2026',lastOrder:'2026-06-24'},
+  {name:'Sandra K.',email:'sandra@email.com',phone:'080-8888-3456',orders:3,spent:70000,joined:'Mar 2026',lastOrder:'2026-06-25'},
+  {name:'Ngozi P.',email:'ngozi@email.com',phone:'081-4444-9012',orders:1,spent:6000,joined:'Jun 2026',lastOrder:'2026-06-26'},
+  {name:'David A.',email:'david@email.com',phone:'090-2222-6789',orders:5,spent:32000,joined:'Feb 2026',lastOrder:'2026-06-25'},
+];
+
+const STATUS_CFG = {
+  pending:     {label:'Pending',    cls:'badge-pending'},
+  'in-progress':{label:'In Progress',cls:'badge-progress'},
+  done:        {label:'Done',       cls:'badge-done'},
+  declined:    {label:'Declined',   cls:'badge-declined'},
+  dispute:     {label:'Dispute',    cls:'badge-dispute'},
+};
+
+let orderFilter = 'all';
+
+// ── INIT ──
+document.getElementById('topbar-date').textContent = new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+buildBarChart();
+renderRecentOrders();
+renderAllOrders();
+renderVendors();
+renderDisputes();
+renderCustomers();
+
+function buildBarChart(){
+  const days=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const vals=[5,8,6,11,9,7,3];
+  const max=Math.max(...vals);
+  const el=document.getElementById('bar-chart');
+  el.innerHTML=days.map((d,i)=>`
+    <div class="bar-col">
+      <div class="bar" style="height:${Math.round(vals[i]/max*90)}px"></div>
+      <span class="bar-lbl">${d}</span>
+    </div>`).join('');
+}
+
+function badgeHTML(status){
+  const c=STATUS_CFG[status]||{label:status,cls:''};
+  return `<span class="badge ${c.cls}">${c.label}</span>`;
+}
+
+function renderOrderTable(orders, containerId, limit){
+  const rows = (limit ? orders.slice(0,limit) : orders);
+  if(!rows.length){
+    document.getElementById(containerId).innerHTML='<div class="empty-state"><div class="empty-icon">📭</div>No orders here</div>';
+    return;
+  }
+  document.getElementById(containerId).innerHTML=`
+  <table>
+    <thead><tr><th>Order ID</th><th>Customer</th><th>Service</th><th>Vendor</th><th>Amount</th><th>Status</th><th>Date</th><th></th></tr></thead>
+    <tbody>${rows.map(o=>`
+      <tr>
+        <td style="font-family:monospace;color:#666;font-size:12px">${o.id}</td>
+        <td><div style="font-weight:600">${o.customer}</div><div style="font-size:11px;color:#555">${o.token}</div></td>
+        <td style="color:#aaa">${o.service}</td>
+        <td style="color:#aaa">${o.vendor}</td>
+        <td style="font-weight:700;color:#CE93D8">₦${o.amount.toLocaleString()}</td>
+        <td>${badgeHTML(o.status)}</td>
+        <td style="color:#555;font-size:12px">${o.date.split(' ')[0]}</td>
+        <td><button class="action-btn" onclick='openOrderModal(${JSON.stringify(o)})'>View</button></td>
+      </tr>`).join('')}
+    </tbody>
+  </table>`;
+}
+
+function renderRecentOrders(){ renderOrderTable(ORDERS,'recent-orders-table',5); }
+
+function filterOrders(f,btn){
+  orderFilter=f;
+  document.querySelectorAll('.filter-row .filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderAllOrders();
+}
+
+function renderAllOrders(){
+  const filtered = orderFilter==='all' ? ORDERS : ORDERS.filter(o=>o.status===orderFilter);
+  renderOrderTable(filtered,'all-orders-table');
+}
+
+function renderVendors(){
+  document.getElementById('vendors-grid').innerHTML=VENDORS.map(v=>`
+    <div class="vendor-card">
+      <img class="vendor-card-img" src="${v.img}" alt="${v.name}" onerror="this.style.display='none'"/>
+      <div class="vendor-card-body">
+        <div class="vendor-card-top">
+          <div class="vendor-card-name">${v.emoji} ${v.name}</div>
+          ${v.status==='suspended'?'<span class="badge badge-declined">Suspended</span>':'<span class="badge badge-done">Active</span>'}
+        </div>
+        <div class="vendor-card-type">${v.type} · ${v.location}</div>
+        <div class="vendor-card-meta">⭐ ${v.rating} rating · Joined ${v.joined}</div>
+        <div class="vendor-card-stats">
+          <div class="vstat"><div class="vstat-val">${v.orders}</div><div class="vstat-lbl">Orders</div></div>
+          <div class="vstat"><div class="vstat-val">₦${(v.earned/1000).toFixed(0)}k</div><div class="vstat-lbl">Earned</div></div>
+          <div class="vstat"><div class="vstat-val">${v.id}</div><div class="vstat-lbl">Vendor ID</div></div>
+        </div>
+        <div class="vendor-actions">
+          <button class="vbtn" onclick="toast('Message sent to ${v.name}')">Message</button>
+          <button class="vbtn suspend" onclick="toast('${v.name} ${v.status==='suspended'?'reinstated':'suspended'}')">${v.status==='suspended'?'Reinstate':'Suspend'}</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function renderDisputes(){
+  const disputes=ORDERS.filter(o=>o.status==='dispute');
+  document.getElementById('dispute-list').innerHTML= disputes.length ? disputes.map(o=>`
+    <div class="dispute-card urgent">
+      <div class="dispute-top">
+        <div>
+          <div class="dispute-id">${o.id} · ${o.token}</div>
+          <div class="dispute-service">${o.service}</div>
+          <div class="dispute-meta">👤 ${o.customer} · 🏪 ${o.vendor} · 📍 ${o.location} · ${o.date}</div>
+        </div>
+        <div style="font-weight:700;color:#CE93D8;font-size:18px">₦${(o.amount+o.bond).toLocaleString()}</div>
+      </div>
+      <div class="dispute-reason">"${o.disputeReason}"</div>
+      <div class="dispute-btns">
+        <button class="dbtn dbtn-refund" onclick="resolveDispute('${o.id}','refund')">💸 Refund Customer</button>
+        <button class="dbtn dbtn-release" onclick="resolveDispute('${o.id}','release')">✅ Release to Vendor</button>
+        <button class="dbtn dbtn-msg" onclick="toast('Message sent to both parties')">💬 Message Both</button>
+      </div>
+    </div>`).join('')
+  : '<div class="empty-state"><div class="empty-icon">✅</div>No open disputes</div>';
+}
+
+function renderCustomers(){
+  document.getElementById('customers-table').innerHTML=`
+  <table>
+    <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Orders</th><th>Total Spent</th><th>Joined</th><th>Last Order</th></tr></thead>
+    <tbody>${CUSTOMERS.map(c=>`
+      <tr>
+        <td style="font-weight:600">${c.name}</td>
+        <td style="color:#666;font-size:12px">${c.email}</td>
+        <td style="color:#666;font-size:12px">${c.phone}</td>
+        <td style="color:#CE93D8;font-weight:700">${c.orders}</td>
+        <td style="font-weight:700">₦${c.spent.toLocaleString()}</td>
+        <td style="color:#555;font-size:12px">${c.joined}</td>
+        <td style="color:#555;font-size:12px">${c.lastOrder}</td>
+      </tr>`).join('')}
+    </tbody>
+  </table>`;
+}
+
+function resolveDispute(id, action){
+  const label = action==='refund' ? 'Customer refunded. Escrow released.' : 'Escrow released to vendor.';
+  toast('✅ ' + label);
+  setTimeout(()=>{ renderDisputes(); document.getElementById('dispute-badge').textContent=Math.max(0,parseInt(document.getElementById('dispute-badge').textContent)-1); },800);
+}
+
+function openOrderModal(o){
+  document.getElementById('modal-title').textContent = o.service;
+  document.getElementById('modal-sub').textContent = o.id + ' · ' + o.token;
+  document.getElementById('modal-body').innerHTML=`
+    <div class="modal-row"><span class="modal-lbl">Customer</span><span class="modal-val">${o.customer}</span></div>
+    <div class="modal-row"><span class="modal-lbl">Email</span><span class="modal-val" style="font-size:13px">${o.email}</span></div>
+    <div class="modal-row"><span class="modal-lbl">Phone</span><span class="modal-val">${o.phone}</span></div>
+    <div class="modal-row"><span class="modal-lbl">Vendor</span><span class="modal-val">${o.vendor} (${o.vendorId})</span></div>
+    <div class="modal-row"><span class="modal-lbl">Location</span><span class="modal-val">${o.location}</span></div>
+    <div class="modal-row"><span class="modal-lbl">Date</span><span class="modal-val">${o.date}</span></div>
+    <div class="modal-row"><span class="modal-lbl">Status</span><span class="modal-val">${badgeHTML(o.status)}</span></div>
+    <div class="modal-row"><span class="modal-lbl">Service amount</span><span class="modal-val" style="color:#CE93D8">₦${o.amount.toLocaleString()}</span></div>
+    <div class="modal-row"><span class="modal-lbl">Punctuality bond</span><span class="modal-val" style="color:#F5A623">₦${o.bond.toLocaleString()}</span></div>
+    <div class="modal-row"><span class="modal-lbl">Total in escrow</span><span class="modal-val" style="color:#CE93D8;font-size:16px;font-weight:800">₦${(o.amount+o.bond).toLocaleString()}</span></div>
+    ${o.note?`<div class="modal-row"><span class="modal-lbl">Note</span><span class="modal-val" style="color:#aaa">${o.note}</span></div>`:''}
+    ${o.disputeReason?`<div style="margin-top:14px;background:#1a0d0d;border-left:3px solid #EF5350;padding:12px 14px;border-radius:0 8px 8px 0;font-size:13px;color:#aaa">${o.disputeReason}</div>`:''}
+  `;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function closeModal(e){
+  if(!e || e.target===document.getElementById('modal-overlay'))
+    document.getElementById('modal-overlay').classList.remove('open');
+}
+
+function switchView(id, btn){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const titles={overview:'Overview',orders:'All Orders',vendors:'Vendors',disputes:'Disputes',customers:'Customers'};
+  document.getElementById('page-title').textContent=titles[id]||id;
+}
+
+function toast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),2800);
+}
+</script>
+</body>
+</html>
+
